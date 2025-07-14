@@ -42,9 +42,9 @@ function install_homebrew() {
 	if $already_installed && $FORCE_REINSTALL; then
 		pretty_info "Reinstalling Homebrew..."
 		if $VERBOSE; then
-			/bin/bash -c "$(ctheme -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
+			/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
 		else
-			/bin/bash -c "$(ctheme -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)" >/dev/null 2>&1
+			/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)" >/dev/null 2>&1
 		fi
 		ANY_CHANGES_MADE=true
 	elif $already_installed; then
@@ -55,9 +55,9 @@ function install_homebrew() {
 	fi
 
 	if $VERBOSE; then
-		/bin/bash -c "$(ctheme -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+		/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 	else
-		/bin/bash -c "$(ctheme -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" >/dev/null 2>&1
+		/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" >/dev/null 2>&1
 	fi
 	ANY_CHANGES_MADE=true
 }
@@ -301,9 +301,9 @@ function install_omz() {
 	fi
 
 	if $VERBOSE; then
-		sh -c "$(ctheme -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+		sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 	else
-		sh -c "$(ctheme -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" >/dev/null 2>&1
+		sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" >/dev/null 2>&1
 	fi
 }
 
