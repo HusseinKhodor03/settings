@@ -301,9 +301,9 @@ function install_omz() {
 	fi
 
 	if $VERBOSE; then
-		sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+		git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git "$HOME/.oh-my-zsh"
 	else
-		sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" >/dev/null 2>&1
+		git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git "$HOME/.oh-my-zsh" >/dev/null 2>&1
 	fi
 }
 
@@ -757,10 +757,8 @@ function backup_dotfiles() {
 	if $DRY_RUN; then
 		pretty_info "Dry run complete. No changes were made."
 	elif $any_backed_up; then
-		print_newline
 		pretty_success "All dotfiles backed up successfully!"
 	else
-		print_newline
 		pretty_info "No dotfiles needed to be backed up."
 	fi
 }
