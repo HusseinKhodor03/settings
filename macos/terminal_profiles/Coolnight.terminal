@@ -166,6 +166,8 @@
 	</data>
 	<key>BookmarkRestorations</key>
 	<true/>
+	<key>CommandString</key>
+	<string></string>
 	<key>CursorBlink</key>
 	<true/>
 	<key>CursorColor</key>
@@ -199,15 +201,15 @@
 	<data>
 	YnBsaXN0MDDUAQIDBAUGBwpYJHZlcnNpb25ZJGFyY2hpdmVyVCR0b3BYJG9iamVjdHMS
 	AAGGoF8QD05TS2V5ZWRBcmNoaXZlctEICVRyb290gAGkCwwVFlUkbnVsbNQNDg8QERIT
-	FFZOU1NpemVYTlNmRmxhZ3NWTlNOYW1lViRjbGFzcyNAMgAAAAAAABAQgAKAA18QEk1l
-	c2xvTEdTTkYtUmVndWxhctIXGBkaWiRjbGFzc25hbWVYJGNsYXNzZXNWTlNGb250ohkb
-	WE5TT2JqZWN0CBEaJCkyN0lMUVNYXmdud36FjpCSlKmuucLJzAAAAAAAAAEBAAAAAAAA
-	ABwAAAAAAAAAAAAAAAAAAADV
+	FFZOU1NpemVYTlNmRmxhZ3NWTlNOYW1lViRjbGFzcyNAMgAAAAAAABAQgAKAA18QE01l
+	c2xvTEdTLU5GLVJlZ3VsYXLSFxgZGlokY2xhc3NuYW1lWCRjbGFzc2VzVk5TRm9udKIZ
+	G1hOU09iamVjdAgRGiQpMjdJTFFTWF5nbnd+hY6QkpSqr7rDys0AAAAAAAABAQAAAAAA
+	AAAcAAAAAAAAAAAAAAAAAAAA1g==
 	</data>
 	<key>ProfileCurrentVersion</key>
 	<real>2.0699999999999998</real>
 	<key>RunCommandAsShell</key>
-	<false/>
+	<true/>
 	<key>SelectionColor</key>
 	<data>
 	YnBsaXN0MDDUAQIDBAUGBwpYJHZlcnNpb25ZJGFyY2hpdmVyVCR0b3BYJG9iamVjdHMS
@@ -245,7 +247,7 @@
 	<key>columnCount</key>
 	<integer>132</integer>
 	<key>name</key>
-	<string>Coolnight</string>
+	<string>Coolnight 2</string>
 	<key>noWarnProcesses</key>
 	<array>
 		<dict>
