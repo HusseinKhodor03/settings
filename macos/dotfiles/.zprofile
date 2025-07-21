@@ -1,3 +1,6 @@
+# Disable macOS shell session saving
+export SHELL_SESSIONS_DISABLE=1
+
 # Load Homebrew
 /opt/homebrew/bin/brew &>/dev/null && eval "$(/opt/homebrew/bin/brew shellenv)"
 
