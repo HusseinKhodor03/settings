@@ -934,7 +934,7 @@ function main() {
 	if $ANY_CHANGES_MADE; then
 		print_newline
 		pretty_success "Setup complete!"
-		pretty_info "Changes were made. Restart your terminal by running 'exec zsh' for changes to take effect."
+		restart_terminal
 	else
 		print_newline
 		pretty_info "No changes were made."
