@@ -687,6 +687,61 @@ function install_meslo_nerd_fonts() {
 	fi
 }
 
+function configure_terminal_profile() {
+	local profile_name="Coolnight"
+	local profile_file="$HOME/settings/macos/terminal_profiles/${profile_name}.terminal"
+	local terminal_plist="$HOME/Library/Preferences/com.apple.Terminal.plist"
+	local current_default=$(defaults read com.apple.Terminal "Default Window Settings" 2>/dev/null)
+	local current_startup=$(defaults read com.apple.Terminal "Startup Window Settings" 2>/dev/null)
+	local max_wait=20
+	local interval=0.25
+	local attempts=$(awk "BEGIN {print int(${max_wait} / ${interval})}")
+
+	print_newline
+	pretty_info "Configuring terminal profile:"
+
+	if /usr/libexec/PlistBuddy -c "Print :'Window Settings':'$profile_name'" "$terminal_plist" &>/dev/null; then
+		pretty_info "Terminal profile '${profile_name}' already exists. Skipping import..."
+	else
+		open "$profile_file"
+
+		for ((i = 1; i <= attempts; i++)); do
+			if /usr/libexec/PlistBuddy -c "Print :'Window Settings':'$profile_name'" "$terminal_plist" &>/dev/null; then
+				pretty_success "Terminal profile '${profile_name}' imported successfully."
+				break
+			fi
+			sleep "$interval"
+		done
+
+		if (( i > attempts )); then
+			pretty_error "Terminal profile ${profile_name} could not be imported, attempt timed out."
+			return
+		fi
+
+		osascript <<EOF
+tell application "Terminal"
+	try
+		close (every window whose name of current settings is "$profile_name")
+	end try
+end tell
+EOF
+	fi
+
+	if [[ "$current_default" != "$profile_name" ]]; then
+		defaults write com.apple.Terminal "Default Window Settings" -string "$profile_name"
+		pretty_success "'Default Window Settings' changed to '$profile_name'."
+	else
+		pretty_info "'Default Window Settings' already set to '$profile_name'."
+	fi
+
+	if [[ "$current_startup" != "$profile_name" ]]; then
+		defaults write com.apple.Terminal "Startup Window Settings" -string "$profile_name"
+		pretty_success "'Startup Window Settings' changed to '$profile_name'."
+	else
+		pretty_info "'Startup Window Settings' already set to '$profile_name'."
+	fi
+}
+
 function backup_dotfiles() {
 	print_newline
 	pretty_info "Backing up existing dotfiles:"
@@ -872,6 +927,7 @@ function main() {
 	install_custom_omz_themes
 	install_custom_omz_plugins
 	install_meslo_nerd_fonts
+	configure_terminal_profile
 	backup_dotfiles
 	link_dotfiles
 
