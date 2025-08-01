@@ -934,7 +934,14 @@ function main() {
 	if $ANY_CHANGES_MADE; then
 		print_newline
 		pretty_success "Setup complete!"
-		restart_terminal
+		print_newline
+		pretty_warn "Some changes require Terminal to be restarted to take effect."
+		print_newline
+		pretty_info "To ensure all changes properly take effect:"
+		print_newline
+		pretty_info "1. Close all open Terminal windows manually"
+		pretty_info "2. Quit the Terminal app"
+		pretty_info "3. Reopen the Terminal app"
 	else
 		print_newline
 		pretty_info "No changes were made."
