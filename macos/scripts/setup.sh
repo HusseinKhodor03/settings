@@ -687,58 +687,194 @@ function install_meslo_nerd_fonts() {
 	fi
 }
 
-function configure_terminal_profile() {
+function import_terminal_profile() {
 	local profile_name="Coolnight"
 	local profile_file="$HOME/settings/macos/terminal_profiles/${profile_name}.terminal"
 	local terminal_plist="$HOME/Library/Preferences/com.apple.Terminal.plist"
-	local current_default=$(defaults read com.apple.Terminal "Default Window Settings" 2>/dev/null)
-	local current_startup=$(defaults read com.apple.Terminal "Startup Window Settings" 2>/dev/null)
+	local already_imported=false
+
+	print_newline
+	pretty_info "Checking terminal profile installation:"
+
+	if ! [[ -f "$profile_file" ]]; then
+		pretty_error "Terminal profile '$profile_name' not found"
+		return
+	fi
+
+	if /usr/libexec/PlistBuddy -c "Print :'Window Settings':'$profile_name'" "$terminal_plist" &>/dev/null; then
+		already_imported=true
+	fi
+
+	if $DRY_RUN; then
+		if $already_imported; then
+			if $FORCE_REINSTALL; then
+				if $VERBOSE; then
+					pretty_info "[Dry Run] Would uninstall and reinstall terminal profile '$profile_name' verbosely"
+				else
+					pretty_info "[Dry Run] Would uninstall and reinstall terminal profile '$profile_name'"
+				fi
+			else
+				pretty_info "[Dry Run] Terminal profile '$profile_name' already installed. Would skip"
+			fi
+		else
+			if $VERBOSE; then
+				pretty_info "[Dry Run] Would install terminal profile '$profile_name' verbosely"
+			else
+				pretty_info "[Dry Run] Would install terminal profile '$profile_name'"
+			fi
+		fi
+
+		return
+	fi
+
+	if $already_imported; then
+		if $FORCE_REINSTALL; then
+			pretty_info "Reinstalling terminal profile '$profile_name'..."
+			if $VERBOSE; then
+				pretty_info "Removing existing profile '$profile_name' from $terminal_plist"
+				printf "Command: /usr/libexec/PlistBuddy -c \"Delete :'Window Settings':'$profile_name'\" \"$terminal_plist\"\n"
+			fi
+			/usr/libexec/PlistBuddy -c "Delete :'Window Settings':'$profile_name'" "$terminal_plist"
+			ANY_CHANGES_MADE=true
+		else
+			pretty_info "Terminal profile '$profile_name' already installed. Skipping..."
+			return
+		fi
+	else
+		pretty_info "Installing terminal profile '$profile_name'..."
+	fi
+
+	if $VERBOSE; then
+		pretty_info "Opening profile file $profile_file to import"
+		printf "Command: open \"$profile_file\"\n"
+	fi
+	open "$profile_file"
+
 	local max_wait=20
 	local interval=0.25
 	local attempts=$(awk "BEGIN {print int(${max_wait} / ${interval})}")
 
-	print_newline
-	pretty_info "Configuring terminal profile:"
-
-	if /usr/libexec/PlistBuddy -c "Print :'Window Settings':'$profile_name'" "$terminal_plist" &>/dev/null; then
-		pretty_info "Terminal profile '${profile_name}' already exists. Skipping import..."
-	else
-		open "$profile_file"
-
-		for ((i = 1; i <= attempts; i++)); do
-			if /usr/libexec/PlistBuddy -c "Print :'Window Settings':'$profile_name'" "$terminal_plist" &>/dev/null; then
-				pretty_success "Terminal profile '${profile_name}' imported successfully."
-				break
-			fi
-			sleep "$interval"
-		done
-
-		if (( i > attempts )); then
-			pretty_error "Terminal profile ${profile_name} could not be imported, attempt timed out."
-			return
+	for ((i = 1; i <= attempts; i++)); do
+		if /usr/libexec/PlistBuddy -c "Print :'Window Settings':'$profile_name'" "$terminal_plist" &>/dev/null; then
+			pretty_success "Terminal profile '${profile_name}' imported successfully."
+			ANY_CHANGES_MADE=true
+			break
 		fi
+		sleep "$interval"
+	done
 
-		osascript <<EOF
+	if (( i > attempts )); then
+		pretty_error "Terminal profile ${profile_name} could not be imported, attempt timed out."
+		return
+	fi
+
+	osascript <<EOF
 tell application "Terminal"
 	try
 		close (every window whose name of current settings is "$profile_name")
 	end try
 end tell
 EOF
+}
+
+function set_terminal_profile_as_default() {
+	local profile_name="Coolnight"
+	local current_default=$(defaults read com.apple.Terminal "Default Window Settings" 2>/dev/null)
+	local current_startup=$(defaults read com.apple.Terminal "Startup Window Settings" 2>/dev/null)
+
+	local already_default=false
+	local already_startup=false
+
+	print_newline
+	pretty_info "Checking default terminal profile:"
+
+	if [[ "$current_default" == "$profile_name" ]]; then
+		already_default=true
 	fi
 
-	if [[ "$current_default" != "$profile_name" ]]; then
+	if [[ "$current_startup" == "$profile_name" ]]; then
+		already_startup=true
+	fi
+
+	if $DRY_RUN; then
+		if $already_default && $already_startup; then
+			if $FORCE_REINSTALL; then
+				if $VERBOSE; then
+					pretty_info "[Dry Run] Would unset and reset terminal profile '$profile_name' as both default and startup window settings verbosely"
+				else
+					pretty_info "[Dry Run] Would unset and reset terminal profile '$profile_name' as both default and startup window settings"
+				fi
+			else
+				pretty_info "[Dry Run] Terminal profile '$profile_name' already set as default and startup window profile. Would skip"
+			fi
+		else
+			if ! $already_default && ! $already_startup; then
+				if $VERBOSE; then
+					pretty_info "[Dry Run] Would set terminal profile '$profile_name' as both default and startup window settings verbosely"
+				else
+					pretty_info "[Dry Run] Would set terminal profile '$profile_name' as both default and startup window settings"
+				fi
+			elif ! $already_default; then
+				if $VERBOSE; then
+					pretty_info "[Dry Run] Would set terminal profile '$profile_name' as default window settings verbosely"
+				else
+					pretty_info "[Dry Run] Would set terminal profile '$profile_name' as default window settings"
+				fi
+			elif ! $already_startup; then
+				if $VERBOSE; then
+					pretty_info "[Dry Run] Would set terminal profile '$profile_name' as startup window settings verbosely"
+				else
+					pretty_info "[Dry Run] Would set terminal profile '$profile_name' as startup window settings"
+				fi
+			fi
+		fi
+
+		return
+	fi
+
+	if $already_default && $already_startup; then
+		if $FORCE_REINSTALL; then
+			pretty_info "Unsetting and resetting terminal profile '$profile_name' as both default and startup window settings..."
+			if $VERBOSE; then
+				pretty_info "Removing existing profile '$profile_name' from default and startup window settings"
+				printf "Command: defaults delete com.apple.Terminal 'Default Window Settings'\n"
+				printf "Command: defaults delete com.apple.Terminal 'Startup Window Settings'\n"
+			fi
+			defaults delete com.apple.Terminal "Default Window Settings" 2>/dev/null || true
+			defaults delete com.apple.Terminal "Startup Window Settings" 2>/dev/null || true
+			ANY_CHANGES_MADE=true
+		else
+			pretty_info "Terminal profile '$profile_name' already set as default and startup window profile. Skipping..."
+			return
+		fi
+	fi
+
+	if ! $already_default && ! $already_startup; then
+		pretty_info "Setting terminal profile '$profile_name' as both default and startup window settings..."
+		if $VERBOSE; then
+			printf "Command: defaults write com.apple.Terminal 'Default Window Settings' -string '$profile_name'\n"
+			printf "Command: defaults write com.apple.Terminal 'Startup Window Settings' -string '$profile_name'\n"
+		fi
 		defaults write com.apple.Terminal "Default Window Settings" -string "$profile_name"
-		pretty_success "'Default Window Settings' changed to '$profile_name'."
-	else
-		pretty_info "'Default Window Settings' already set to '$profile_name'."
-	fi
-
-	if [[ "$current_startup" != "$profile_name" ]]; then
 		defaults write com.apple.Terminal "Startup Window Settings" -string "$profile_name"
-		pretty_success "'Startup Window Settings' changed to '$profile_name'."
-	else
-		pretty_info "'Startup Window Settings' already set to '$profile_name'."
+		pretty_success "Terminal profile '$profile_name' set as both default and startup window settings successfully."
+		ANY_CHANGES_MADE=true
+	elif ! $already_default; then
+		pretty_info "Setting terminal profile '$profile_name' as default window settings..."
+		if $VERBOSE; then
+			printf "Command: defaults write com.apple.Terminal 'Default Window Settings' -string '$profile_name'\n"
+		fi
+		defaults write com.apple.Terminal "Default Window Settings" -string "$profile_name"
+		pretty_success "Terminal profile '$profile_name' set as default window setting successfully."
+		ANY_CHANGES_MADE=true
+	elif ! $already_startup; then
+		pretty_info "Setting terminal profile '$profile_name' as startup window settings..."
+		if $VERBOSE; then
+			printf "Command: defaults write com.apple.Terminal 'Startup Window Settings' -string '$profile_name'\n"
+		fi
+		defaults write com.apple.Terminal "Startup Window Settings" -string "$profile_name"
+		pretty_success "Terminal profile '$profile_name' set as startup window setting successfully."
+		ANY_CHANGES_MADE=true
 	fi
 }
 
@@ -927,7 +1063,8 @@ function main() {
 	install_custom_omz_themes
 	install_custom_omz_plugins
 	install_meslo_nerd_fonts
-	configure_terminal_profile
+	import_terminal_profile
+	set_terminal_profile_as_default
 	backup_dotfiles
 	link_dotfiles
 
