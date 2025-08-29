@@ -692,6 +692,8 @@ function import_terminal_profile() {
 	local profile_file="$HOME/settings/macos/terminal_profiles/${profile_name}.terminal"
 	local terminal_plist="$HOME/Library/Preferences/com.apple.Terminal.plist"
 	local already_imported=false
+	local desired_font="MesloLGS NF"
+	local desired_font_size=18
 
 	print_newline
 	pretty_info "Checking terminal profile installation:"
@@ -772,6 +774,8 @@ function import_terminal_profile() {
 tell application "Terminal"
 	try
 		close (every window whose name of current settings is "$profile_name")
+		set font name of settings set "$profile_name" to "$desired_font"
+		set font size of settings set "$profile_name" to $desired_font_size
 	end try
 end tell
 EOF
