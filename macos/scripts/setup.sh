@@ -908,10 +908,10 @@ function backup_dotfiles() {
 		((current++))
 
 		if $DRY_RUN; then
-			if [[ ! -e "$dotfile" ]]; then
-				pretty_info "[Dry Run] No existing %s found to back up. Would skip" "$target"
-			elif [[ -e "$backup_path" && ! $FORCE_REINSTALL ]]; then
+			if [[ -e "$backup_path" && ! $FORCE_REINSTALL ]]; then
 				pretty_info "[Dry Run] %s already backed up. Would skip" "$target"
+			elif [[ ! -e "$dotfile" ]]; then
+				pretty_info "[Dry Run] No existing %s found to back up. Would skip" "$target"
 			elif [[ -e "$backup_path" && $FORCE_REINSTALL ]]; then
 				if $VERBOSE; then
 					pretty_info "[Dry Run] Would overwrite backup of %s at %s verbosely" "$target" "$backup_path"
@@ -928,11 +928,11 @@ function backup_dotfiles() {
 			continue
 		fi
 
-		if [[ ! -e "$dotfile" ]]; then
-			pretty_info "No existing %s found to back up. Skipping..." "$target"
-			continue
-		elif [[ -e "$backup_path" && ! $FORCE_REINSTALL ]]; then
+		if [[ -e "$backup_path" && ! $FORCE_REINSTALL ]]; then
 			pretty_info "%s already backed up. Skipping..." "$target"
+			continue
+		elif [[ ! -e "$dotfile" ]]; then
+			pretty_info "No existing %s found to back up. Skipping..." "$target"
 			continue
 		fi
 
