@@ -413,14 +413,14 @@ function install_custom_omz_themes() {
 
 	for theme in "${themes[@]}"; do
 		local name="$(basename "$theme" .git)"
-		local theme_dir="$themes_dir/$name"
+		local dotfile="$themes_dir/$name"
 
 		print_newline
 		pretty_info "Theme $current of $total: Processing %s..." "$name"
 		((current++))
 
 		local already_installed=false
-		if [[ -d "$theme_dir" ]]; then
+		if [[ -d "$dotfile" ]]; then
 			already_installed=true
 		fi
 
@@ -449,10 +449,10 @@ function install_custom_omz_themes() {
 			if $FORCE_REINSTALL; then
 				pretty_info "Reinstalling %s..." "$name"
 				if $VERBOSE; then
-					pretty_info "Removing %s from %s" "$name" "$theme_dir"
-					printf "Command: rm -rf \"%s\"\n" "$theme_dir"
+					pretty_info "Removing %s from %s" "$name" "$dotfile"
+					printf "Command: rm -rf \"%s\"\n" "$dotfile"
 				fi
-				rm -rf "$theme_dir"
+				rm -rf "$dotfile"
 				ANY_CHANGES_MADE=true
 			else
 				pretty_info "%s already installed. Skipping..." "$name"
@@ -463,9 +463,9 @@ function install_custom_omz_themes() {
 		fi
 
 		if $VERBOSE; then
-			git clone --depth=1 "$theme" "$theme_dir"
+			git clone --depth=1 "$theme" "$dotfile"
 		else
-			git clone --depth=1 "$theme" "$theme_dir" >/dev/null 2>&1
+			git clone --depth=1 "$theme" "$dotfile" >/dev/null 2>&1
 		fi
 
 		if [[ $? -eq 0 ]]; then
@@ -889,8 +889,6 @@ function backup_dotfiles() {
 	local backup_dir="$HOME/dotfiles_baks"
 	local any_backed_up=false
 
-	mkdir -p "$backup_dir"
-
 	local files=()
 	while IFS= read -r -d $'\0' file; do
 		files+=("$file")
@@ -901,7 +899,7 @@ function backup_dotfiles() {
 
 	for file in "${files[@]}"; do
 		local target="${file#$dotfiles_dir/}"
-		local theme_dir="$HOME/$target"
+		local dotfile="$HOME/$target"
 		local backup_path="$backup_dir/$target"
 		local target_dir="$(dirname "$backup_path")"
 
@@ -910,8 +908,8 @@ function backup_dotfiles() {
 		((current++))
 
 		if $DRY_RUN; then
-			if [[ ! -e "$theme_dir" || -L "$theme_dir" ]]; then
-				pretty_info "[Dry Run] %s already backed up. Would skip" "$target"
+			if [[ ! -e "$dotfile" ]]; then
+				pretty_info "[Dry Run] No existing %s found to back up. Would skip" "$target"
 			elif [[ -e "$backup_path" && ! $FORCE_REINSTALL ]]; then
 				pretty_info "[Dry Run] %s already backed up. Would skip" "$target"
 			elif [[ -e "$backup_path" && $FORCE_REINSTALL ]]; then
@@ -922,16 +920,16 @@ function backup_dotfiles() {
 				fi
 			else
 				if $VERBOSE; then
-					pretty_info "[Dry Run] Would move %s to %s verbosely" "$theme_dir" "$backup_path"
+					pretty_info "[Dry Run] Would move %s to %s verbosely" "$dotfile" "$backup_path"
 				else
-					pretty_info "[Dry Run] Would move %s to %s" "$theme_dir" "$backup_path"
+					pretty_info "[Dry Run] Would move %s to %s" "$dotfile" "$backup_path"
 				fi
 			fi
 			continue
 		fi
 
-		if [[ ! -e "$theme_dir" || -L "$theme_dir" ]]; then
-			pretty_info "%s already backed up. Skipping..." "$target"
+		if [[ ! -e "$dotfile" ]]; then
+			pretty_info "No existing %s found to back up. Skipping..." "$target"
 			continue
 		elif [[ -e "$backup_path" && ! $FORCE_REINSTALL ]]; then
 			pretty_info "%s already backed up. Skipping..." "$target"
@@ -944,12 +942,12 @@ function backup_dotfiles() {
 			if [[ -e "$backup_path" && $FORCE_REINSTALL ]]; then
 				pretty_info "Overwriting backup of %s at %s" "$target" "$backup_path"
 			else
-				pretty_info "Moving %s to %s" "$theme_dir" "$backup_path"
+				pretty_info "Moving %s to %s" "$dotfile" "$backup_path"
 			fi
-			printf "Command: mv \"%s\" \"%s\"\n" "$theme_dir" "$backup_path"
+			printf "Command: mv \"%s\" \"%s\"\n" "$dotfile" "$backup_path"
 		fi
 
-		mv "$theme_dir" "$backup_path"
+		mv "$dotfile" "$backup_path"
 		pretty_success "Backed up %s to %s" "$target" "$backup_path"
 		any_backed_up=true
 		ANY_CHANGES_MADE=true
@@ -981,7 +979,7 @@ function link_dotfiles() {
 
 	for file in "${files[@]}"; do
 		local target="${file#$dotfiles_dir/}"
-		local theme_dir="$HOME/$target"
+		local dotfile="$HOME/$target"
 		local target_dir="$HOME/$(dirname "$target")"
 
 		print_newline
@@ -989,21 +987,21 @@ function link_dotfiles() {
 		((current++))
 
 		if $DRY_RUN; then
-			if [[ -L "$theme_dir" && "$(readlink "$theme_dir")" == "$file" ]]; then
+			if [[ -L "$dotfile" && "$(readlink "$dotfile")" == "$file" ]]; then
 				if $FORCE_REINSTALL; then
 					if $VERBOSE; then
-						pretty_info "[Dry Run] Would relink %s -> %s verbosely" "$theme_dir" "$file"
+						pretty_info "[Dry Run] Would relink %s -> %s verbosely" "$dotfile" "$file"
 					else
-						pretty_info "[Dry Run] Would relink %s -> %s" "$theme_dir" "$file"
+						pretty_info "[Dry Run] Would relink %s -> %s" "$dotfile" "$file"
 					fi
 				else
 					pretty_info "[Dry Run] %s already linked. Would skip" "$target"
 				fi
 			else
 				if $VERBOSE; then
-					pretty_info "[Dry Run] Would link %s -> %s verbosely" "$theme_dir" "$file"
+					pretty_info "[Dry Run] Would link %s -> %s verbosely" "$dotfile" "$file"
 				else
-					pretty_info "[Dry Run] Would link %s -> %s" "$theme_dir" "$file"
+					pretty_info "[Dry Run] Would link %s -> %s" "$dotfile" "$file"
 				fi
 			fi
 			continue
@@ -1011,13 +1009,13 @@ function link_dotfiles() {
 
 		mkdir -p "$target_dir"
 
-		if [[ -L "$theme_dir" && "$(readlink "$theme_dir")" == "$file" ]]; then
+		if [[ -L "$dotfile" && "$(readlink "$dotfile")" == "$file" ]]; then
 			if $FORCE_REINSTALL; then
 				if $VERBOSE; then
-					pretty_info "Relinking %s -> %s" "$theme_dir" "$file"
-					printf "Command: ln -sf \"%s\" \"%s\"\n" "$file" "$theme_dir"
+					pretty_info "Relinking %s -> %s" "$dotfile" "$file"
+					printf "Command: ln -sf \"%s\" \"%s\"\n" "$file" "$dotfile"
 				fi
-				ln -sf "$file" "$theme_dir"
+				ln -sf "$file" "$dotfile"
 				pretty_success "%s relinked successfully" "$target"
 				any_linked=true
 				ANY_CHANGES_MADE=true
@@ -1034,11 +1032,11 @@ function link_dotfiles() {
 		fi
 
 		if $VERBOSE; then
-			pretty_info "Linking %s -> %s" "$theme_dir" "$file"
-			printf "Command: ln -sf \"%s\" \"%s\"\n" "$file" "$theme_dir"
+			pretty_info "Linking %s -> %s" "$dotfile" "$file"
+			printf "Command: ln -sf \"%s\" \"%s\"\n" "$file" "$dotfile"
 		fi
 
-		ln -sf "$file" "$theme_dir"
+		ln -sf "$file" "$dotfile"
 		if [[ $? -eq 0 ]]; then
 			pretty_success "%s linked successfully" "$target"
 			any_linked=true
