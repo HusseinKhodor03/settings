@@ -910,6 +910,8 @@ function backup_dotfiles() {
 		if $DRY_RUN; then
 			if [[ -e "$backup_path" && $FORCE_REINSTALL == false ]]; then
 				pretty_info "[Dry Run] %s already backed up. Would skip" "$target"
+			elif [[ -L "$dotfile" ]]; then
+				pretty_info "[Dry Run] %s is a symlink. Would skip" "$target"
 			elif [[ ! -e "$dotfile" ]]; then
 				pretty_info "[Dry Run] No existing %s found to back up. Would skip" "$target"
 			elif [[ -e "$backup_path" && $FORCE_REINSTALL == true ]]; then
@@ -930,6 +932,9 @@ function backup_dotfiles() {
 
 		if [[ -e "$backup_path" && $FORCE_REINSTALL == false ]]; then
 			pretty_info "%s already backed up. Skipping..." "$target"
+			continue
+		elif [[ -L "$dotfile" ]]; then
+			pretty_info "%s is a symlink. Skipping..." "$target"
 			continue
 		elif [[ ! -e "$dotfile" ]]; then
 			pretty_info "No existing %s found to back up. Skipping..." "$target"
