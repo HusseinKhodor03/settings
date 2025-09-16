@@ -304,13 +304,25 @@ function install_omz() {
 		fi
 	else
 		pretty_info "Installing Oh My Zsh..."
-		ANY_CHANGES_MADE=true
 	fi
 
 	if $VERBOSE; then
 		git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git "$HOME/.oh-my-zsh"
 	else
 		git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git "$HOME/.oh-my-zsh" >/dev/null 2>&1
+	fi
+
+	if $already_installed; then
+		pretty_success "Oh My Zsh installed successfully!"
+		ANY_CHANGES_MADE=true
+	else
+		pretty_error "Failed to install Oh My Zsh"
+		return $EXIT_FAILURE
+	fi
+
+	print_newline
+	if $DRY_RUN; then
+		pretty_info "Dry run complete. No changes were made."
 	fi
 }
 
