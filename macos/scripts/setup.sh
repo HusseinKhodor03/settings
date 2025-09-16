@@ -48,7 +48,7 @@ function install_homebrew() {
 		fi
 		ANY_CHANGES_MADE=true
 	elif $already_installed; then
-		pretty_info "Homebrew already installed. Skipping..."
+		pretty_success "Homebrew already installed. Skipping..."
 		return
 	else
 		pretty_info "Installing Homebrew..."
@@ -222,7 +222,7 @@ function install_vim_plugins() {
 				rm -rf "$plugin_dir"
 				ANY_CHANGES_MADE=true
 			else
-				pretty_info "%s already installed. Skipping..." "$name"
+				pretty_success "%s already installed. Skipping..." "$name"
 				continue
 			fi
 		else
@@ -299,7 +299,7 @@ function install_omz() {
 			rm -rf "$HOME/.oh-my-zsh"
 			ANY_CHANGES_MADE=true
 		else
-			pretty_info "Oh My Zsh already installed. Skipping..."
+			pretty_success "Oh My Zsh already installed. Skipping..."
 			return
 		fi
 	else
@@ -374,7 +374,7 @@ function set_zsh_as_default() {
 		echo "$zsh_path" | sudo tee -a /etc/shells >/dev/null
 		ANY_CHANGES_MADE=true
 	else
-		pretty_info "%s already in /etc/shells. Skipping..." "$zsh_path"
+		pretty_success "%s already in /etc/shells. Skipping..." "$zsh_path"
 	fi
 
 	if [[ "$current_shell" != "$zsh_path" ]]; then
@@ -385,7 +385,7 @@ function set_zsh_as_default() {
 		chsh -s "$zsh_path"
 		ANY_CHANGES_MADE=true
 	else
-		pretty_info "%s already set to default shell. Skipping..." "$zsh_path"
+		pretty_success "%s already set to default shell. Skipping..." "$zsh_path"
 	fi
 }
 
@@ -455,7 +455,7 @@ function install_custom_omz_themes() {
 				rm -rf "$dotfile"
 				ANY_CHANGES_MADE=true
 			else
-				pretty_info "%s already installed. Skipping..." "$name"
+				pretty_success "%s already installed. Skipping..." "$name"
 				continue
 			fi
 		else
@@ -554,7 +554,7 @@ function install_custom_omz_plugins() {
 				rm -rf "$plugin_dir"
 				ANY_CHANGES_MADE=true
 			else
-				pretty_info "%s already installed. Skipping..." "$name"
+				pretty_success "%s already installed. Skipping..." "$name"
 				continue
 			fi
 		else
@@ -654,7 +654,7 @@ function install_meslo_nerd_fonts() {
 				rm -rf "$font_dir"
 				ANY_CHANGES_MADE=true
 			else
-				pretty_info "%s already installed. Skipping..." "$filename"
+				pretty_success "%s already installed. Skipping..." "$filename"
 				continue
 			fi
 		else
@@ -739,7 +739,7 @@ function import_terminal_profile() {
 			/usr/libexec/PlistBuddy -c "Delete :'Window Settings':'$profile_name'" "$terminal_plist"
 			ANY_CHANGES_MADE=true
 		else
-			pretty_info "Terminal profile '$profile_name' already installed. Skipping..."
+			pretty_success "Terminal profile '$profile_name' already installed. Skipping..."
 			return
 		fi
 	else
@@ -848,7 +848,7 @@ function set_terminal_profile_as_default() {
 			defaults delete com.apple.Terminal "Startup Window Settings" 2>/dev/null || true
 			ANY_CHANGES_MADE=true
 		else
-			pretty_info "Terminal profile '$profile_name' already set as default and startup window profile. Skipping..."
+			pretty_success "Terminal profile '$profile_name' already set as default and startup window profile. Skipping..."
 			return
 		fi
 	fi
@@ -931,7 +931,7 @@ function backup_dotfiles() {
 		fi
 
 		if [[ -e "$backup_path" && $FORCE_REINSTALL == false ]]; then
-			pretty_info "%s already backed up. Skipping..." "$target"
+			pretty_success "%s already backed up. Skipping..." "$target"
 			continue
 		elif [[ -L "$dotfile" ]]; then
 			pretty_info "%s is a symlink. Skipping..." "$target"
