@@ -60,13 +60,24 @@ function install_homebrew() {
 		/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" >/dev/null 2>&1
 	fi
 
+	if $already_installed; then
+		pretty_success "Homebrew installed successfully!"
+		ANY_CHANGES_MADE=true
+	else
+		pretty_error "Failed to install Homebrew"
+		return $EXIT_FAILURE
+	fi
+
 	if [[ -x /opt/homebrew/bin/brew ]]; then
 		eval "$(/opt/homebrew/bin/brew shellenv)"
 	elif [[ -x /usr/local/bin/brew ]]; then
 		eval "$(/usr/local/bin/brew shellenv)"
 	fi
 
-	ANY_CHANGES_MADE=true
+	print_newline
+	if $DRY_RUN; then
+		pretty_info "Dry run complete. No changes were made."
+	fi
 }
 
 function install_homebrew_packages() {
