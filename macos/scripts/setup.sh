@@ -36,6 +36,9 @@ function install_homebrew() {
 				pretty_info "[Dry Run] Would install Homebrew"
 			fi
 		fi
+
+		print_newline
+		pretty_info "Dry run complete. No changes were made."
 		return
 	fi
 
@@ -72,11 +75,6 @@ function install_homebrew() {
 		eval "$(/opt/homebrew/bin/brew shellenv)"
 	elif [[ -x /usr/local/bin/brew ]]; then
 		eval "$(/usr/local/bin/brew shellenv)"
-	fi
-
-	print_newline
-	if $DRY_RUN; then
-		pretty_info "Dry run complete. No changes were made."
 	fi
 }
 
@@ -297,6 +295,8 @@ function install_omz() {
 			fi
 		fi
 
+		print_newline
+		pretty_info "Dry run complete. No changes were made."
 		return
 	fi
 
@@ -329,11 +329,6 @@ function install_omz() {
 	else
 		pretty_error "Failed to install Oh My Zsh"
 		return $EXIT_FAILURE
-	fi
-
-	print_newline
-	if $DRY_RUN; then
-		pretty_info "Dry run complete. No changes were made."
 	fi
 }
 
@@ -377,6 +372,8 @@ function set_zsh_as_default() {
 			pretty_info "[Dry Run] %s already set to default shell. Would skip" "$zsh_path"
 		fi
 
+		print_newline
+		pretty_info "Dry run complete. No changes were made."
 		return
 	fi
 
@@ -749,6 +746,8 @@ function import_terminal_profile() {
 			fi
 		fi
 
+		print_newline
+		pretty_info "Dry run complete. No changes were made."
 		return
 	fi
 
@@ -856,6 +855,8 @@ function set_terminal_profile_as_default() {
 			fi
 		fi
 
+		print_newline
+		pretty_info "Dry run complete. No changes were made."
 		return
 	fi
 
