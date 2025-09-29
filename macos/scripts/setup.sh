@@ -10,11 +10,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/helpers.sh"
 source "$SCRIPT_DIR/flags.sh"
 
+source_shellenv
+
 function install_homebrew() {
 	pretty_info "Checking Homebrew installation:"
 
 	local already_installed=false
-	if command -v brew &>/dev/null 2>&1; then
+	if [[ -x /opt/homebrew/bin/brew ]] || [[ -x /usr/local/bin/brew ]] &>/dev/null; then
 		already_installed=true
 	fi
 

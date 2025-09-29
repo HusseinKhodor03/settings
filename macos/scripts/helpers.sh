@@ -44,3 +44,11 @@ function request_sudo_upfront() {
         done 2>/dev/null &
     fi
 }
+
+function source_shellenv() {
+    if [[ -x /opt/homebrew/bin/brew ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [[ -x /usr/local/bin/brew ]]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+    fi
+}
