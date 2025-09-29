@@ -1117,4 +1117,5 @@ function main() {
 }
 
 parse_flags "$@"
+request_sudo_upfront
 main

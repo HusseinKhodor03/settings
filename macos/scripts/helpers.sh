@@ -27,3 +27,17 @@ function pretty_error() {
 function print_newline() {
 	printf "\n"
 }
+
+function request_sudo_upfront() {
+    if ! $DRY_RUN; then
+        pretty_info "This script may require administrative privileges for certain operations."
+        sudo -v
+        print_newline
+
+        while true; do
+            sudo -n true
+            sleep 60
+            kill -0 "$$" || exit
+        done 2>/dev/null &
+    fi
+}
