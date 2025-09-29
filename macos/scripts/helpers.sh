@@ -30,6 +30,9 @@ function print_newline() {
 
 function request_sudo_upfront() {
     if ! $DRY_RUN; then
+        if $FORCE_REINSTALL; then
+            print_newline
+        fi
         pretty_info "This script may require administrative privileges for certain operations."
         sudo -v
         print_newline
