@@ -322,7 +322,7 @@ function install_omz() {
 		git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git "$HOME/.oh-my-zsh" >/dev/null 2>&1
 	fi
 
-	if $already_installed; then
+	if [[ -d "$HOME/.oh-my-zsh" ]]; then
 		pretty_success "Oh My Zsh installed successfully!"
 		ANY_CHANGES_MADE=true
 	else
