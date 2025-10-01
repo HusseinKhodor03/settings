@@ -47,9 +47,9 @@ function install_homebrew() {
 	if $already_installed && $FORCE_REINSTALL; then
 		pretty_info "Reinstalling Homebrew..."
 		if $VERBOSE; then
-			NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
+			sudo NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
 		else
-			NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)" >/dev/null 2>&1
+			sudo NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)" >/dev/null 2>&1
 		fi
 		ANY_CHANGES_MADE=true
 	elif $already_installed; then
@@ -449,7 +449,7 @@ function set_zsh_as_default() {
 	fi
 
 	if $VERBOSE; then
-		pretty_info "Changing default shell to %s..." "$zsh_path"
+		pretty_info "Setting default shell to %s..." "$zsh_path"
 		printf "Command: chsh -s \"%s\"\n" "$zsh_path"
 	fi
 	chsh -s "$zsh_path"
