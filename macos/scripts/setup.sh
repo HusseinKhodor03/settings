@@ -334,26 +334,33 @@ function install_omz() {
 }
 
 function manage_etc_shells() {
+	print_newline
+	pretty_info "Ensuring shell is in /etc/shells:"
+
 	local zsh_path="$(command -v zsh)"
 
-	print_newline
-	pretty_info "Ensuring shell is is /etc/shells:"
+	local already_in_etc_shells=false
+	if grep -qFx "$zsh_path" /etc/shells; then
+		already_in_etc_shells=true
+	fi
 
 	if $DRY_RUN; then
-		if $FORCE_REINSTALL && grep -q "$zsh_path" /etc/shells; then
-			if $VERBOSE; then
-				pretty_info "[Dry Run] Would remove and re-add %s to /etc/shells verbosely" "$zsh_path"
+		if $already_in_etc_shells; then
+			if $FORCE_REINSTALL; then
+				if $VERBOSE; then
+					pretty_info "[Dry Run] Would remove and re-add %s to /etc/shells verbosely" "$zsh_path"
+				else
+					pretty_info "[Dry Run] Would remove and re-add %s to /etc/shells" "$zsh_path"
+				fi
 			else
-				pretty_info "[Dry Run] Would remove and re-add %s to /etc/shells" "$zsh_path"
+				pretty_info "[Dry Run] %s already in /etc/shells. Would skip" "$zsh_path"
 			fi
-		elif ! grep -q "$zsh_path" /etc/shells; then
+		else
 			if $VERBOSE; then
 				pretty_info "[Dry Run] Would add %s to /etc/shells verbosely" "$zsh_path"
 			else
 				pretty_info "[Dry Run] Would add %s to /etc/shells" "$zsh_path"
 			fi
-		else
-			pretty_info "[Dry Run] %s already in /etc/shells. Would skip" "$zsh_path"
 		fi
 
 		print_newline
@@ -361,50 +368,65 @@ function manage_etc_shells() {
 		return
 	fi
 
-	if $FORCE_REINSTALL && grep -q "$zsh_path" /etc/shells; then
+	if $already_in_etc_shells && $FORCE_REINSTALL; then
 		if $VERBOSE; then
 			pretty_info "Removing %s from /etc/shells..." "$zsh_path"
 			printf "Command: grep -vFx \"%s\" /etc/shells | sudo tee /etc/shells\n" "$zsh_path"
 		fi
 		grep -vFx "$zsh_path" /etc/shells | sudo tee /etc/shells >/dev/null
 		ANY_CHANGES_MADE=true
+	elif $already_in_etc_shells; then
+		pretty_success "%s already in /etc/shells. Skipping..." "$zsh_path"
+		return
+	else
+		pretty_info "Configuring shell..."
 	fi
 
-	if ! grep -q "$zsh_path" /etc/shells; then
-		if $VERBOSE; then
-			pretty_info "Adding %s to /etc/shells..." "$zsh_path"
-			printf "Command: printf \"%%s\\n\" \"%s\" | sudo tee -a /etc/shells\n" "$zsh_path"
-		fi
-		echo "$zsh_path" | sudo tee -a /etc/shells >/dev/null
-		ANY_CHANGES_MADE=true
+	if $VERBOSE; then
+		pretty_info "Adding %s to /etc/shells..." "$zsh_path"
+		printf "Command: printf \"%%s\\n\" \"%s\" | sudo tee -a /etc/shells\n" "$zsh_path"
+	fi
+	echo "$zsh_path" | sudo tee -a /etc/shells >/dev/null
+	ANY_CHANGES_MADE=true
+
+	if grep -qFx "$zsh_path" /etc/shells; then
+		pretty_success "%s added to /etc/shells successfully!" "$zsh_path"
 	else
-		pretty_success "%s already in /etc/shells. Skipping..." "$zsh_path"
+		pretty_error "Failed to add %s to /etc/shells" "$zsh_path"
+		return $EXIT_FAILURE
 	fi
 }
 
 function set_zsh_as_default() {
+	print_newline
+	pretty_info "Checking default shell:"
+
 	local zsh_path="$(command -v zsh)"
 	local current_shell="$(dscl . -read "$HOME" UserShell | awk '{print $2}')"
 	local fallback_shell="/bin/bash"
 
-	print_newline
-	pretty_info "Checking default shell:"
+	local already_default=false
+	if [[ "$current_shell" == "$zsh_path" ]]; then
+		already_default=true
+	fi
 
 	if $DRY_RUN; then
-		if [[ "$current_shell" != "$zsh_path" ]]; then
+		if $already_default; then
+			if $FORCE_REINSTALL; then
+				if $VERBOSE; then
+					pretty_info "[Dry Run] Would unset and re-set %s as the default shell verbosely" "$zsh_path"
+				else
+					pretty_info "[Dry Run] Would unset and re-set %s as the default shell" "$zsh_path"
+				fi
+			else
+				pretty_info "[Dry Run] %s already set to default shell. Would skip" "$zsh_path"
+			fi
+		else
 			if $VERBOSE; then
 				pretty_info "[Dry Run] Would change default shell to %s verbosely" "$zsh_path"
 			else
 				pretty_info "[Dry Run] Would change default shell to %s" "$zsh_path"
 			fi
-		elif $FORCE_REINSTALL; then
-			if $VERBOSE; then
-				pretty_info "[Dry Run] Would unset and re-set %s as the default shell verbosely" "$zsh_path"
-			else
-				pretty_info "[Dry Run] Would unset and re-set %s as the default shell" "$zsh_path"
-			fi
-		else
-			pretty_info "[Dry Run] %s already set to default shell. Would skip" "$zsh_path"
 		fi
 
 		print_newline
@@ -412,24 +434,33 @@ function set_zsh_as_default() {
 		return
 	fi
 
-	if $FORCE_REINSTALL && [[ "$current_shell" == "$zsh_path" ]]; then
+	if $already_default && $FORCE_REINSTALL; then
 		if $VERBOSE; then
 			pretty_info "Unsetting %s as default shell..." "$zsh_path"
 			printf "Command: chsh -s \"%s\"\n" "$fallback_shell"
 		fi
 		chsh -s "$fallback_shell"
 		ANY_CHANGES_MADE=true
+	elif $already_default; then
+		pretty_success "%s already set to default shell. Skipping..." "$zsh_path"
+		return
+	else
+		pretty_info "Configuring default..."
 	fi
 
-	if [[ "$current_shell" != "$zsh_path" ]]; then
-		if $VERBOSE; then
-			pretty_info "Changing default shell to %s..." "$zsh_path"
-			printf "Command: chsh -s \"%s\"\n" "$zsh_path"
-		fi
-		chsh -s "$zsh_path"
-		ANY_CHANGES_MADE=true
+	if $VERBOSE; then
+		pretty_info "Changing default shell to %s..." "$zsh_path"
+		printf "Command: chsh -s \"%s\"\n" "$zsh_path"
+	fi
+	chsh -s "$zsh_path"
+	ANY_CHANGES_MADE=true
+
+	current_shell="$(dscl . -read "$HOME" UserShell | awk '{print $2}')"
+	if [[ "$current_shell" == "$zsh_path" ]]; then
+		pretty_success "%s set as default shell successfully!" "$zsh_path"
 	else
-		pretty_success "%s already set to default shell. Skipping..." "$zsh_path"
+		pretty_error "Failed to set %s as default shell" "$zsh_path"
+		return $EXIT_FAILURE
 	fi
 }
 
