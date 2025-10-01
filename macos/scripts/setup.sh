@@ -384,7 +384,7 @@ function manage_etc_shells() {
 
 	if $VERBOSE; then
 		pretty_info "Adding %s to /etc/shells..." "$zsh_path"
-		printf "Command: printf \"%%s\\n\" \"%s\" | sudo tee -a /etc/shells\n" "$zsh_path"
+		printf "Command: echo \"%s\" | sudo tee -a /etc/shells\n" "$zsh_path"
 	fi
 	echo "$zsh_path" | sudo tee -a /etc/shells >/dev/null
 	ANY_CHANGES_MADE=true
